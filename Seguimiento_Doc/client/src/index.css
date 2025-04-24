@@ -1,33 +1,37 @@
-/* index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html {
   color-scheme: light dark;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  transition: background-color 0.3s, color 0.3s; /* Transición suave para el cambio de fondo y color */
+  transition: background-color 0.3s, color 0.3s; 
+  overflow: hidden;
 }
 
-/* Estilo para modo claro */
 body.light {
-  background-color: #ffffff; /* Fondo blanco en el modo claro */
-  color: #213547; /* Texto oscuro en el modo claro */
+  background-color: #ffffff;
+  color: #213547; 
 }
 
 /* Estilo para modo oscuro */
 body.dark {
-  background-color: #242424; /* Fondo oscuro en el modo oscuro */
-  color: rgba(255, 255, 255, 0.87); /* Texto claro en el modo oscuro */
+  background-color: #242424;
+  color: rgba(255, 255, 255, 0.87); 
 }
 
 h1, p, a {
-  color: inherit; /* Hereda el color del body */
+  color: inherit; 
 }
 
 h1 {
@@ -57,10 +61,9 @@ button {
   transition: border-color 0.25s;
 }
 
-/* Estilo para el modo oscuro en botones */
 body.dark button {
-  background-color: #333333; /* Fondo oscuro en el modo oscuro */
-  color: #ffffff; /* Texto blanco en el modo oscuro */
+  background-color: #333333;
+  color: #ffffff; 
 }
 
 button:hover {
@@ -70,4 +73,9 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
 }
