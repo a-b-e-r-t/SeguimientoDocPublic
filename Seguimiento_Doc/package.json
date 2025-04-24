@@ -1,0 +1,18 @@
+{
+  "name": "seguimiento_doc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node start.js",
+    "client": "npm --prefix client run dev",
+    "server": "npm --prefix server run dev",
+    "build-client": "npm --prefix client run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

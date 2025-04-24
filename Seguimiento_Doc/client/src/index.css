@@ -1,0 +1,73 @@
+/* index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  transition: background-color 0.3s, color 0.3s; /* Transición suave para el cambio de fondo y color */
+}
+
+/* Estilo para modo claro */
+body.light {
+  background-color: #ffffff; /* Fondo blanco en el modo claro */
+  color: #213547; /* Texto oscuro en el modo claro */
+}
+
+/* Estilo para modo oscuro */
+body.dark {
+  background-color: #242424; /* Fondo oscuro en el modo oscuro */
+  color: rgba(255, 255, 255, 0.87); /* Texto claro en el modo oscuro */
+}
+
+h1, p, a {
+  color: inherit; /* Hereda el color del body */
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+/* Estilo para el modo oscuro en botones */
+body.dark button {
+  background-color: #333333; /* Fondo oscuro en el modo oscuro */
+  color: #ffffff; /* Texto blanco en el modo oscuro */
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
