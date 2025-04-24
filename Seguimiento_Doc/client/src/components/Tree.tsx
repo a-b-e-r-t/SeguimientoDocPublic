@@ -7,6 +7,7 @@ export default function Tree() {
             <div className="border-l-4 border-red-500 pl-4">
               <div className="font-semibold">Dependencia Inicio: </div>
               <div>MESA DE PARTES</div>
+              <div className="text-sm font-normal">Responsable:  perico palotes </div>
               <div className="text-sm font-normal">Fecha de Solicitud: 00/00/2000 8:27 AM</div>
             </div>
           </li>
@@ -15,6 +16,7 @@ export default function Tree() {
             <div className="border-l-4 border-red-500 pl-4">
               <div className="font-semibold">Derivado de: </div>
               <div>MESA DE PARTES a ESCUELA PROFESIONAL DE INGENIERIA </div>
+              <div className="text-sm font-normal">Responsable:  perico palotes </div>
               <div className="text-sm font-normal">Fecha: 00/00/2000 8:27 AM</div>
             </div>
           </li>

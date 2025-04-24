@@ -5,18 +5,15 @@ const DarkModeToggle = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Verificamos si hay un tema guardado en el localStorage
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       setIsDarkMode(savedTheme === 'dark');
     } else {
-      // Si no hay preferencia, usamos la preferencia por defecto del sistema
       setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
     }
   }, []);
 
   useEffect(() => {
-    // Aplicamos la clase 'dark' o 'light' al body cuando el modo cambia
     if (isDarkMode) {
       document.body.classList.add('dark');
       document.body.classList.remove('light');
@@ -34,9 +31,9 @@ const DarkModeToggle = () => {
       onClick={() => setIsDarkMode(!isDarkMode)}
     >
       {isDarkMode ? (
-        <MoonIcon className="h-5 w-5" />  // Icono de luna en modo oscuro
+        <MoonIcon className="h-5 w-5" />  
       ) : (
-        <SunIcon className="h-5 w-5" />  // Icono de sol en modo claro
+        <SunIcon className="h-5 w-5" /> 
       )}
     </button>
   );
