@@ -18,8 +18,6 @@ function App() {
 
         <DarkModeToggle />
       </div>
-
-      {/* El contenedor ahora está con un espacio superior suficiente para que no se solapen */}
       <div className="w-full max-w-4xl space-y-6 mt-24 px-4">
         <Search />  
         <Tree />  
