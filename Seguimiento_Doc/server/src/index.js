@@ -3,12 +3,14 @@ import express from "express";
 import cors from "cors";
 import remitoRoutes from "./routes/remitido.route.js"; 
 import { query } from "./db/db.js";
+import { ddosProtection } from "./middleware/SecuriyDDoS.js";
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
+app.use(ddosProtection); 
 
-// Ruta para verificar conexión a la DB
 app.get("/api/db-test", async (req, res) => {
   try {
     const result = await query('SELECT NOW()');
@@ -19,7 +21,6 @@ app.get("/api/db-test", async (req, res) => {
   }
 });
 
-// ✅ Monta la ruta para remitos
 app.use("/api", remitoRoutes);  
 
 const PORT = 3001;

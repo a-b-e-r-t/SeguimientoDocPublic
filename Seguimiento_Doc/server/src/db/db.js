@@ -15,6 +15,7 @@ pool.connect()
     client.release(); 
   })
   .catch(err => {
+    console.log(err);
     console.error('❌ Error al conectar a la base de datos:', err.message);
   });
 
@@ -22,3 +23,4 @@ export async function query(text, params) {
   const res = await pool.query(text, params);
   return res.rows;
 }
+

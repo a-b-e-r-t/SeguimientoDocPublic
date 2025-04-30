@@ -1,14 +1,11 @@
 import { obtenerResumenPorExpediente } from '../../services/remitidos.services.js';
 
 export async function getResumenPorExpediente(req, res) {
-  const { expediente } = req.params;
-
-  if (!expediente) {
-    return res.status(400).json({ error: 'Falta el parámetro "expediente"' });
-  }
+  const { sanitizedExpediente } = req;
 
   try {
-    const resumen = await obtenerResumenPorExpediente(expediente);
+    const resumen = await obtenerResumenPorExpediente(sanitizedExpediente);
+    //console.log('Resumen que se enviará:', resumen);
     res.status(200).json(resumen);
   } catch (err) {
     console.error('Error al obtener resumen:', err);
