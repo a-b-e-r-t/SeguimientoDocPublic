@@ -5,7 +5,6 @@ export async function getResumenPorExpediente(req, res) {
 
   try {
     const resumen = await obtenerResumenPorExpediente(sanitizedExpediente);
-    //console.log('Resumen que se enviará:', resumen);
     res.status(200).json(resumen);
   } catch (err) {
     console.error('Error al obtener resumen:', err);

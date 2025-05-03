@@ -20,7 +20,13 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Permite importar archivos JS */
+    "allowJs": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "api"  // Asegúrate de que la carpeta 'api' también se incluya para que TypeScript reconozca archivos JS allí
+  ]
 }

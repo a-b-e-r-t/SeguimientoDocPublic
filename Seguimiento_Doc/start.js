@@ -3,6 +3,7 @@ const { exec } = require("child_process");
 console.log("⏳ Compilando frontend...");
 exec("npm --prefix client run build", (err, stdout, stderr) => {
   if (err) {
+    console.log(err);
     console.error("❌ Error al compilar el frontend:", stderr);
     process.exit(1);
   }

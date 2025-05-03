@@ -1,19 +1,28 @@
+// src/components/Search.tsx
 import { useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
-export default function Search() {
+interface SearchProps {
+  onSearch: (query: string) => void; 
+}
+
+export default function Search({ onSearch }: SearchProps) {
   const [query, setQuery] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
+    setQuery(e.target.value); 
   };
 
   const handleSearch = () => {
-    console.log("Buscando:", query);
+    if (onSearch) {
+      onSearch(query);;
+    } else {
+      console.error("onSearch no está definida.");
+    }
   };
 
   return (
-    <div className="relative w-full flex justify-center items-center z-10 mt-4"> 
+    <div className="relative w-full flex justify-center items-center z-10 mt-4">
       <div className="flex flex-col justify-center items-center w-full px-4 bg-transparent">
         <h1 className="text-3xl font-bold text-center text-black dark:text-white mb-4">
           Seguimiento de trámites
@@ -42,8 +51,7 @@ export default function Search() {
           </button>
         </div>
 
-        <div className="mt-8 w-full max-w-4xl">
-        </div>
+        <div className="mt-8 w-full max-w-4xl"></div>
       </div>
     </div>
   );

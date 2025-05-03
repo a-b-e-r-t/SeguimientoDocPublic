@@ -1,7 +1,6 @@
 import DarkModeToggle from './components/DarkModeToggle';
 import Background from './components/Background';
-import Search from './components/Search';
-import Tree from './components/Tree';
+import SeguimientoContainer from './components/tramites'; // Importa el componente contenedor
 
 function App() {
   return (
@@ -19,8 +18,8 @@ function App() {
         <DarkModeToggle />
       </div>
       <div className="w-full max-w-4xl space-y-6 mt-24 px-4">
-        <Search />  
-        <Tree />  
+        {/* Usamos el componente contenedor que maneja Search y Tree */}
+        <SeguimientoContainer />  
       </div>
     </div>
   );
