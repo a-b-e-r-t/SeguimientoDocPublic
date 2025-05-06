@@ -62,7 +62,7 @@ export default function Tree({ expediente }: TreeProps) {
                   </div>
                   <div>
                     {index === 0
-                      ? item.co_dep_emi_ref || "CIUDADANO"
+                      ? item.co_dep_emi_ref || "MESA DE PARTES"
                       : item.ti_emi_des || "CIUDADANO"}
                   </div>
 
