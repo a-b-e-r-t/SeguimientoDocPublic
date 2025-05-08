@@ -2,7 +2,8 @@ import 'dotenv/config';
 import express from "express";
 import cors from "cors";
 import remitoRoutes from "./routes/remitido.route.js";
-import tiposDocumentosRoutes from "./routes/tipos_documentos.routes.js"; // Importamos la nueva ruta
+import tiposDocumentosRoutes from "./routes/tipos_documentos.routes.js";
+import seguimientoRoutes from "./routes/seguimiento_numDoc.routes.js";
 import { query } from "./db/db.js";
 import { ddosProtection } from "./middleware/SecuriyDDoS.js";
 
@@ -24,6 +25,7 @@ app.get("/api/db-test", async (req, res) => {
 
 app.use("/api", remitoRoutes);  
 app.use("/api", tiposDocumentosRoutes);  
+app.use("/api", seguimientoRoutes);  // http://localhost:3001/api/seguimiento/000327/40664791/003
 
 const PORT = 3001;
 app.listen(PORT, () => {

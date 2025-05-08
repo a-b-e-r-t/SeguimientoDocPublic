@@ -5,8 +5,17 @@ interface TreeProps {
   expediente: string;
 }
 
+interface DatoResumen {
+  co_dep_emi_ref?: string;
+  ti_emi_des?: string;
+  co_emp_emi?: string;
+  co_emp_des?: string;
+  fecha?: string;
+  estado_doc?: string;
+}
+
 export default function Tree({ expediente }: TreeProps) {
-  const [datos, setDatos] = useState<any[]>([]);
+  const [datos, setDatos] = useState<DatoResumen[]>([]);
   const [cargando, setCargando] = useState<boolean>(false);
 
   useEffect(() => {
@@ -27,7 +36,7 @@ export default function Tree({ expediente }: TreeProps) {
     obtenerDatos();
   }, [expediente]);
 
-  const formatearFechaHora = (fechaISO: string) => {
+  const formatearFechaHora = (fechaISO?: string) => {
     if (!fechaISO) return "Fecha no disponible";
     const fecha = new Date(fechaISO);
     return fecha.toLocaleString("es-PE", {
