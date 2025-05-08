@@ -1,4 +1,3 @@
-// src/components/SeguimientoContainer.tsx
 import { useState } from "react";
 import Search from "./Search";
 import Tree from "./Tree";
@@ -11,7 +10,7 @@ export default function SeguimientoContainer() {
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-8 px-4 pt-6 pb-12 max-w-6xl mx-auto">
       <Search onSearch={handleSearch} />
       <Tree expediente={expediente} />
     </div>

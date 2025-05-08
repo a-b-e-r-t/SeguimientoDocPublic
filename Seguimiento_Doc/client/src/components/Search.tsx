@@ -102,7 +102,7 @@ export default function Search({ onSearch }: SearchProps) {
           </div>
         </div>
       </div>
-  </div>
+    </div>
 
   );
 }
