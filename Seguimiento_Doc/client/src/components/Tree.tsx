@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
-import { fetchResumenPorExpediente } from "../../api/remitos";
+import { fetchResumenPorExpediente as fetchRemitos } from "../../api/remitos"; 
+import { fetchResumenPorExpediente as fetchSeguimientoSinExp } from "../../api/Seguimiento_SinExp";  
 
 interface TreeProps {
   expediente: string;
+  esBackCard: boolean;
+  dni: string;
+  tipoSeleccionado: string;
+  numeroDocumento: string;
 }
 
 interface DatoResumen {
@@ -14,27 +19,43 @@ interface DatoResumen {
   estado_doc?: string;
 }
 
-export default function Tree({ expediente }: TreeProps) {
+export default function Tree({
+  expediente,
+  esBackCard,
+  dni,
+  numeroDocumento
+}: TreeProps) {
   const [datos, setDatos] = useState<DatoResumen[]>([]);
   const [cargando, setCargando] = useState<boolean>(false);
 
   useEffect(() => {
     const obtenerDatos = async () => {
-      if (!expediente) return;
+      if (!expediente || !dni || !numeroDocumento) return;
       setCargando(true);
       try {
-        const response = await fetchResumenPorExpediente(expediente);
-        setDatos(response);
+        let nuevosDatos: DatoResumen[] = [];
+        
+        // Si es consulta de expediente, obtenemos los datos de la primera API (remitos)
+        if (!esBackCard) {
+          nuevosDatos = await fetchRemitos(expediente);
+        }
+        // Si es consulta de BackCard, obtenemos los datos de la nueva API (seguimiento_sinexp)
+        else {
+          nuevosDatos = await fetchSeguimientoSinExp(expediente, dni, numeroDocumento);
+        }
+
+        // Concatenamos los nuevos resultados con los existentes para no perder datos previos
+        setDatos((prevDatos) => [...prevDatos, ...nuevosDatos]);
       } catch (error) {
         console.error("Error al obtener los datos:", error);
-        setDatos([]);
+        setDatos([]);  // En caso de error, reseteamos los datos
       } finally {
         setCargando(false);
       }
     };
 
     obtenerDatos();
-  }, [expediente]);
+  }, [expediente, esBackCard, dni, numeroDocumento]);  // Reaccionamos tanto al cambio de 'expediente' como a los nuevos parámetros
 
   const formatearFechaHora = (fechaISO?: string) => {
     if (!fechaISO) return "Fecha no disponible";

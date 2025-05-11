@@ -13,7 +13,7 @@ concurrently.stdout.on("data", (data) => {
     console.log("🌐 Frontend disponible en http://localhost:5173");
   }
   if (str.includes("Servidor corriendo")) {
-    console.log("🚀 Backend disponible en http://localhost:3001");
+    console.log("🚀 Backend disponible en http://localhost:3001 🌐 Frontend disponible en http://localhost:5173");
   }
 });
 

@@ -41,7 +41,6 @@ export default function Search({ onSearch }: SearchProps) {
           <ChevronRightIcon className="h-8 w-8 text-sky-500 hover:text-sky-700 transition" />
         </button>
 
-        {/* Contenedor giratorio */}
         <div
           className="relative w-full transition-transform duration-700"
           style={{
@@ -49,16 +48,14 @@ export default function Search({ onSearch }: SearchProps) {
             transform: rotated ? "rotateY(180deg)" : "rotateY(0deg)",
           }}
         >
-          {/* Cara Frontal */}
+
           <div
             style={{
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
               transform: "rotateY(0deg)",
             }}
-            className={`absolute w-full top-0 left-0 p-6 rounded-2xl transition-opacity duration-500 ${
-              rotated ? "pointer-events-none opacity-0" : "pointer-events-auto opacity-100"
-            } bg-white dark:bg-neutral-800 shadow-md`}
+            className={`absolute w-full top-0 left-0 p-6 rounded-2xl transition-opacity duration-500 ${rotated ? "pointer-events-none opacity-0" : "pointer-events-auto opacity-100"} bg-white dark:bg-neutral-800 shadow-md`}
           >
             <h1 className="text-2xl sm:text-3xl font-bold text-center text-black dark:text-white mb-4">
               Seguimiento de trámites
@@ -87,18 +84,16 @@ export default function Search({ onSearch }: SearchProps) {
             </div>
           </div>
 
-          {/* Cara Trasera */}
           <div
             style={{
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
             }}
-            className={`absolute w-full top-0 left-0 p-6 rounded-2xl transition-opacity duration-500 ${
-              rotated ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-            } bg-white dark:bg-neutral-800 shadow-md`}
+            className={`absolute w-full top-0 left-0 p-6 rounded-2xl transition-opacity duration-500 ${rotated ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"} bg-white dark:bg-neutral-800 shadow-md`}
           >
-            <BackCard query={query} onChange={handleChange} onSearch={handleSearch} />
+            {/* En BackCard no pasamos `query`, solo las funciones */}
+            <BackCard onSearch={handleSearch} />
           </div>
         </div>
       </div>

@@ -1,67 +1,101 @@
 import { query } from '../db/db.js';  
 
-export async function obtenerSeguimientoPorNumeroDocumento(numeroDocumento, usuario, tipoDocumento) {
-  const sql = `
-    WITH rutas AS (
-      SELECT
-        r.nu_emi AS numero_emision,
+export async function obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAdm) {
+  const sql = `WITH DocumentoInicial AS (
+    SELECT
+        r.nu_emi,
+        'INICIO' AS co_dep_emi_ref,
+        dep_des.de_dependencia AS ti_emi_des,
+        u.cdes_user AS co_emp_des,
+        r.fe_use_cre AS hora_recepcion,
+        est.de_est AS estado_documento,
         r.nu_doc_emi,
         doc_tipo.cdoc_desdoc AS tipo_documento,
-        r.nu_ann AS anio,
-        d.co_dep_des AS dependencia_actual,
-        dep_des.de_dependencia AS nombre_dependencia_actual,
-        TO_CHAR(d.fe_rec_doc, 'HH24:MI:SS') AS hora_recepcion,
-        d.fe_rec_doc,
-        u.cdes_user AS responsable_recepcion,
-        est.de_est AS estado_documento
-      FROM
+        r.nu_ann_exp,
+        r.nu_sec_exp
+    FROM
         "IDOSGD_GRA".idosgd.tdtv_remitos r
-      JOIN
+    JOIN
         "IDOSGD_GRA".idosgd.tdtv_destinos d ON r.nu_emi = d.nu_emi
-      LEFT JOIN
+    LEFT JOIN
         "IDOSGD_GRA".idosgd.rhtm_dependencia dep_des ON d.co_dep_des = dep_des.co_dependencia
-      LEFT JOIN
+    LEFT JOIN
         "IDOSGD_GRA".idosgd.seg_usuarios1 u ON d.co_emp_rec = u.cemp_codemp
-      LEFT JOIN
+    LEFT JOIN
         "IDOSGD_GRA".idosgd.tdtr_estados est ON d.es_doc_rec = est.co_est AND est.de_tab = 'TDTV_DESTINOS'
-      LEFT JOIN
+    LEFT JOIN
         "IDOSGD_GRA".idosgd.si_mae_tipo_doc doc_tipo ON r.co_tip_doc_adm = doc_tipo.cdoc_tipdoc
-      WHERE
+    WHERE
         r.nu_doc_emi = $1
         AND r.co_use_cre = $2
-        AND r.co_tip_doc_adm = $3  -- Ahora este parámetro es dinámico
-    ),
-    rutas_con_origen AS (
-      SELECT
-        numero_emision,
-        nu_doc_emi,
-        tipo_documento,
-        anio,
-        LAG(nombre_dependencia_actual) OVER (ORDER BY fe_rec_doc) AS dependencia_origen,
-        nombre_dependencia_actual AS dependencia_destino,
-        hora_recepcion,
-        responsable_recepcion,
-        estado_documento
-      FROM rutas
-    )
-    SELECT
-      numero_emision,
-      nu_doc_emi,
-      tipo_documento,
-      anio,
-      COALESCE(dependencia_origen, 'INICIO') AS de_dependencia,
-      dependencia_destino AS a_dependencia,
-      hora_recepcion,
-      responsable_recepcion,
-      estado_documento
-    FROM rutas_con_origen;
-  `;
+        AND r.co_tip_doc_adm = $3
+)
+
+SELECT 
+    COALESCE(rem.nu_emi, doc.nu_emi) AS nu_emi,
+    COALESCE(dep_emisora.de_dependencia, doc.co_dep_emi_ref) AS co_dep_emi_ref,
+    COALESCE(dep_destino.de_dependencia, doc.ti_emi_des) AS ti_emi_des,
+    COALESCE(u1.cdes_user, doc.co_emp_des) AS co_emp_des,
+    COALESCE(rem.fe_use_cre, doc.hora_recepcion) AS hora_recepcion,
+    COALESCE(e.de_est, doc.estado_documento) AS estado_documento,
+    COALESCE(rem.nu_doc_emi, doc.nu_doc_emi) AS nu_doc_emi,
+    COALESCE(doc_tipo_rem.cdoc_desdoc, doc.tipo_documento) AS tipo_documento,
+    COALESCE(exp.nu_expediente, exp_doc.nu_expediente) AS nu_expediente
+FROM 
+    DocumentoInicial doc
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.tdtc_expediente exp_doc 
+    ON exp_doc.nu_ann_exp = doc.nu_ann_exp AND exp_doc.nu_sec_exp = doc.nu_sec_exp
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.tdtr_referencia ref 
+    ON ref.nu_emi = doc.nu_emi OR ref.nu_emi_ref = doc.nu_emi
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.tdtv_remitos rem 
+    ON rem.nu_emi = ref.nu_emi OR rem.nu_emi = ref.nu_emi_ref
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.tdtc_expediente exp 
+    ON exp.nu_ann_exp = rem.nu_ann_exp AND exp.nu_sec_exp = rem.nu_sec_exp
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.tdtv_destinos d 
+    ON rem.nu_emi = d.nu_emi
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.seg_usuarios1 u1 
+    ON d.co_emp_des = u1.cemp_codemp
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.rhtm_dependencia dep_emisora 
+    ON rem.co_dep_emi = dep_emisora.co_dependencia
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.rhtm_dependencia dep_destino 
+    ON d.co_dep_des = dep_destino.co_dependencia
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.si_mae_tipo_doc doc_tipo_rem 
+    ON rem.co_tip_doc_adm = doc_tipo_rem.cdoc_tipdoc
+LEFT JOIN 
+    "IDOSGD_GRA".idosgd.tdtr_estados e 
+    ON e.co_est = rem.es_doc_emi AND e.de_tab = 'TDTV_REMITOS';`;
 
   try {
-    const result = await query(sql, [numeroDocumento, usuario, tipoDocumento]);  
-    return result;
+    const result = await query(sql, [nuDocEmi, coUseCre, coTipDocAdm]);
+    if (result && result.length > 0) {
+      let expediente = result[0].nu_expediente;
+
+      if (!expediente) {
+        expediente = "documento aun en proyecto";
+      }
+
+      return {
+        expediente,
+        documentos: result
+      };
+    } else {
+      console.log("No se encontraron documentos.");
+      return {
+        expediente: "documento aun en proyecto",
+        documentos: []
+      };
+    }
   } catch (error) {
-    console.error('Error en el servicio de seguimiento:', error);
+    console.error('Error en el servicio de remitos:', error);
     throw new Error('Error en la base de datos');
   }
 }

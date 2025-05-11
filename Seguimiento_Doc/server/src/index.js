@@ -25,7 +25,7 @@ app.get("/api/db-test", async (req, res) => {
 
 app.use("/api", remitoRoutes);  
 app.use("/api", tiposDocumentosRoutes);  
-app.use("/api", seguimientoRoutes);  // http://localhost:3001/api/seguimiento/000327/40664791/003
+app.use("/api", seguimientoRoutes);  
 
 const PORT = 3001;
 app.listen(PORT, () => {
