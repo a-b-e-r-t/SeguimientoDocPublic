@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { fetchTiposDocumento } from "../../api/nom_doc";
+import { fetchTiposDocumento } from "../../api/nom_doc"; // API para obtener tipos de documentos
 
 interface BackCardProps {
-  onSearch: (dni: string, tipo: string, numeroDocumento: string) => void;  // Modificado para recibir los 3 parámetros
+  dni: string; // Valor del DNI (en lugar de query, para claridad)
+  onDniChange: (e: React.ChangeEvent<HTMLInputElement>) => void; // Maneja cambios en DNI
+  onSearch: (dni: string, tipoDoc: string, numDoc: string) => void; // Función para enviar los tres parámetros
 }
 
 interface TipoDocumento {
-  cdoc_coddoc: string;
   cdoc_desdoc: string;
-  cdoc_tipdoc: string;  // Este es el código, se usará internamente
+  cdoc_tipdoc: string;
 }
 
-const BackCard: React.FC<BackCardProps> = ({ onSearch }) => {
+const BackCard: React.FC<BackCardProps> = ({ dni, onDniChange, onSearch }) => {
   const [tiposDocumento, setTiposDocumento] = useState<TipoDocumento[]>([]);
   const [cargando, setCargando] = useState<boolean>(false);
-  const [tipoSeleccionado, setTipoSeleccionado] = useState<string>("");  // Guardamos el código seleccionado
-  const [dni, setDni] = useState<string>("");
+  const [tipoSeleccionado, setTipoSeleccionado] = useState<string>("");
   const [numeroDocumento, setNumeroDocumento] = useState<string>("");
 
   useEffect(() => {
@@ -34,20 +34,16 @@ const BackCard: React.FC<BackCardProps> = ({ onSearch }) => {
     obtenerTiposDocumento();
   }, []);
 
-  const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDni(e.target.value);
-  };
-
   const handleTipoSeleccionado = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setTipoSeleccionado(event.target.value);  // Guardamos el código seleccionado
+    setTipoSeleccionado(event.target.value);
   };
 
-  const handleNumeroDocumentoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNumeroDocumento(e.target.value);
+  const handleNumeroDocumentoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNumeroDocumento(event.target.value);
   };
 
-  const handleBuscar = () => {
-    // Aquí se pasan los tres parámetros a la función onSearch
+  const handleSubmit = () => {
+    // Llamamos a onSearch con los tres parámetros
     onSearch(dni, tipoSeleccionado, numeroDocumento);
   };
 
@@ -61,29 +57,29 @@ const BackCard: React.FC<BackCardProps> = ({ onSearch }) => {
             <input
               type="text"
               value={dni}
-              onChange={handleDniChange}
+              onChange={onDniChange}
               placeholder="DNI"
               className="w-full py-3 px-4 text-lg bg-white dark:bg-neutral-800 text-black dark:text-white rounded-xl shadow-md border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="flex-1">
-          <select
-            value={tipoSeleccionado}
-            onChange={handleTipoSeleccionado}
-            className="w-full py-3 px-4 text-lg bg-white dark:bg-neutral-800 text-black dark:text-white rounded-xl shadow-md border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="" disabled>Seleccionar opción</option>
-            {cargando ? (
-              <option value="">Cargando...</option>
-            ) : (
-              tiposDocumento.map((tipo) => (
-                <option key={tipo.cdoc_coddoc} value={tipo.cdoc_tipdoc}>
-                  {tipo.cdoc_desdoc} 
-                </option>
-              ))
-            )}
-          </select>
+            <select
+              value={tipoSeleccionado}
+              onChange={handleTipoSeleccionado}
+              className="w-full py-3 px-4 text-lg bg-white dark:bg-neutral-800 text-black dark:text-white rounded-xl shadow-md border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>Seleccionar opción</option>
+              {cargando ? (
+                <option value="">Cargando...</option>
+              ) : (
+                tiposDocumento.map((tipo) => (
+                  <option key={tipo.cdoc_tipdoc} value={tipo.cdoc_tipdoc}>
+                    {tipo.cdoc_desdoc}
+                  </option>
+                ))
+              )}
+            </select>
           </div>
 
           <div className="flex-1">
@@ -99,7 +95,7 @@ const BackCard: React.FC<BackCardProps> = ({ onSearch }) => {
 
         <div className="flex justify-center mt-6">
           <button
-            onClick={handleBuscar}  // Llamamos a handleBuscar para pasar los tres parámetros
+            onClick={handleSubmit}
             className="bg-red-500 dark:bg-red-600 text-white py-3 px-6 rounded-xl hover:bg-red-600 dark:hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
           >
             Buscar
