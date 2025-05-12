@@ -1,10 +1,10 @@
-import { obtenerResumenPorExpediente } from "../../services/seguimiento_NumDoc.services.js";
+import {unionDoc } from "../../services/seguimiento_NumDoc.services.js";
 
 export const listarSeguimiento = async (req, res) => {
   const { numeroDocumento, usuario, tipoDocumento } = req.params;  
 
   try {
-    const seguimiento = await obtenerResumenPorExpediente(numeroDocumento, usuario, tipoDocumento);
+    const seguimiento = await unionDoc(numeroDocumento, usuario, tipoDocumento);
     res.json(seguimiento);  
   } catch (error) {
     console.error("Error al obtener el seguimiento:", error);

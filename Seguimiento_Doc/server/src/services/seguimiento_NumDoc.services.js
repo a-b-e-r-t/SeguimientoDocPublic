@@ -1,5 +1,6 @@
-import { query } from '../db/db.js';  
+import { query } from '../db/db.js';
 
+// Método para obtener el resumen de documentos
 export async function obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAdm) {
   const sql = `WITH DocumentoInicial AS (
     SELECT
@@ -76,26 +77,106 @@ LEFT JOIN
 
   try {
     const result = await query(sql, [nuDocEmi, coUseCre, coTipDocAdm]);
-    if (result && result.length > 0) {
-      let expediente = result[0].nu_expediente;
+    let expediente = result[0].nu_expediente;
 
-      if (!expediente) {
-        expediente = "documento aun en proyecto";
-      }
-
-      return {
-        expediente,
-        documentos: result
-      };
-    } else {
-      console.log("No se encontraron documentos.");
-      return {
-        expediente: "documento aun en proyecto",
-        documentos: []
-      };
+    if (!expediente) {
+      expediente = "documento aun en proyecto";
     }
+
+    return {
+      expediente,
+      documentos: result
+    };
   } catch (error) {
     console.error('Error en el servicio de remitos:', error);
+    throw new Error('Error en la base de datos');
+  }
+}
+
+// Método para hacer la consulta con el número de expediente obtenido
+export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
+  try {
+    // Llamamos al primer método para obtener el número de expediente
+    const resumen = await obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAdm);
+    const nuExpediente = resumen.expediente !== "documento aun en proyecto" ? resumen.expediente : null;
+
+    if (!nuExpediente) {
+      throw new Error('No se pudo obtener el número de expediente');
+    }
+
+    const sql = `
+      -- Primera consulta
+      SELECT
+          r.nu_emi AS nu_emi,
+          'INICIO' AS co_dep_emi_ref,
+          dep_des.de_dependencia AS ti_emi_des,
+          u.cdes_user AS co_emp_des,
+          r.fe_use_cre AS hora_recepcion,
+          est.de_est AS estado_documento,
+          r.nu_doc_emi,
+          doc_tipo.cdoc_desdoc AS tipo_documento
+      FROM
+          "IDOSGD_GRA".idosgd.tdtv_remitos r
+      JOIN
+          "IDOSGD_GRA".idosgd.tdtv_destinos d ON r.nu_emi = d.nu_emi
+      LEFT JOIN
+          "IDOSGD_GRA".idosgd.rhtm_dependencia dep_des ON d.co_dep_des = dep_des.co_dependencia
+      LEFT JOIN
+          "IDOSGD_GRA".idosgd.seg_usuarios1 u ON d.co_emp_rec = u.cemp_codemp
+      LEFT JOIN
+          "IDOSGD_GRA".idosgd.tdtr_estados est ON d.es_doc_rec = est.co_est AND est.de_tab = 'TDTV_DESTINOS'
+      LEFT JOIN
+          "IDOSGD_GRA".idosgd.si_mae_tipo_doc doc_tipo ON r.co_tip_doc_adm = doc_tipo.cdoc_tipdoc
+      WHERE
+          r.nu_doc_emi = $1
+          AND r.co_use_cre = $2
+          AND r.co_tip_doc_adm = $3
+    
+      UNION ALL
+    
+      -- Segunda consulta usando el número de expediente obtenido
+      SELECT 
+          r.nu_emi,
+          dep_emisora.de_dependencia AS co_dep_emi_ref,
+          dep_destino.de_dependencia AS ti_emi_des,
+          u1.cdes_user AS co_emp_des,
+          rem.fe_use_cre AS hora_recepcion,
+          (
+              SELECT 
+                  e.de_est
+              FROM 
+                  idosgd.tdtr_estados e
+              WHERE 
+                  e.co_est = rem.es_doc_emi
+                  AND e.de_tab = 'TDTV_REMITOS'
+          ) AS estado_documento,
+          rem.nu_doc_emi,
+          doc_tipo.cdoc_desdoc AS tipo_documento
+      FROM 
+          "IDOSGD_GRA".idosgd.tdtx_remitos_resumen r
+      LEFT JOIN 
+          "IDOSGD_GRA".idosgd.tdtv_remitos rem ON r.nu_emi = rem.nu_emi
+      LEFT JOIN 
+          "IDOSGD_GRA".idosgd.tdtv_destinos d ON r.nu_emi = d.nu_emi
+      LEFT JOIN 
+          "IDOSGD_GRA".idosgd.seg_usuarios1 u1 ON d.co_emp_des = u1.cemp_codemp
+      LEFT JOIN 
+          "IDOSGD_GRA".idosgd.seg_usuarios1 u2 ON r.co_emp_emi = u2.cemp_codemp
+      LEFT JOIN 
+          "IDOSGD_GRA".idosgd.rhtm_dependencia dep_emisora ON dep_emisora.co_dependencia = r.co_dep_emi_ref
+      LEFT JOIN 
+          "IDOSGD_GRA".idosgd.rhtm_dependencia dep_destino ON dep_destino.co_dependencia = r.ti_emi_des
+      LEFT JOIN 
+          "IDOSGD_GRA".idosgd.si_mae_tipo_doc doc_tipo ON rem.co_tip_doc_adm = doc_tipo.cdoc_tipdoc
+      WHERE 
+          r.nu_expediente = $4;
+    `;
+
+    const result = await query(sql, [nuDocEmi, coUseCre, coTipDocAdm, nuExpediente]);
+    return result;
+
+  } catch (error) {
+    console.error('Error en el método unionDoc:', error);
     throw new Error('Error en la base de datos');
   }
 }
