@@ -1,6 +1,5 @@
 import { query } from '../db/db.js';
 
-// Método para obtener el resumen de documentos
 export async function obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAdm) {
   const sql = `WITH DocumentoInicial AS (
     SELECT
@@ -77,7 +76,7 @@ LEFT JOIN
 
   try {
     const result = await query(sql, [nuDocEmi, coUseCre, coTipDocAdm]);
-    let expediente = result[0].nu_expediente;
+    let expediente = (result[0]?.nu_expediente) || (result[1]?.nu_expediente);
 
     if (!expediente) {
       expediente = "documento aun en proyecto";
@@ -93,19 +92,22 @@ LEFT JOIN
   }
 }
 
-// Método para hacer la consulta con el número de expediente obtenido
 export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
   try {
-    // Llamamos al primer método para obtener el número de expediente
     const resumen = await obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAdm);
+    const documentos = resumen.documentos;
     const nuExpediente = resumen.expediente !== "documento aun en proyecto" ? resumen.expediente : null;
 
+    if (documentos.length === 1 && !nuExpediente) {
+      return documentos;
+    }
+
+    // Continuar con la segunda consulta si hay número de expediente
     if (!nuExpediente) {
       throw new Error('No se pudo obtener el número de expediente');
     }
 
     const sql = `
-      -- Primera consulta
       SELECT
           r.nu_emi AS nu_emi,
           'INICIO' AS co_dep_emi_ref,
@@ -131,10 +133,9 @@ export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
           r.nu_doc_emi = $1
           AND r.co_use_cre = $2
           AND r.co_tip_doc_adm = $3
-    
+
       UNION ALL
-    
-      -- Segunda consulta usando el número de expediente obtenido
+
       SELECT 
           r.nu_emi,
           dep_emisora.de_dependencia AS co_dep_emi_ref,
@@ -160,8 +161,6 @@ export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
           "IDOSGD_GRA".idosgd.tdtv_destinos d ON r.nu_emi = d.nu_emi
       LEFT JOIN 
           "IDOSGD_GRA".idosgd.seg_usuarios1 u1 ON d.co_emp_des = u1.cemp_codemp
-      LEFT JOIN 
-          "IDOSGD_GRA".idosgd.seg_usuarios1 u2 ON r.co_emp_emi = u2.cemp_codemp
       LEFT JOIN 
           "IDOSGD_GRA".idosgd.rhtm_dependencia dep_emisora ON dep_emisora.co_dependencia = r.co_dep_emi_ref
       LEFT JOIN 
