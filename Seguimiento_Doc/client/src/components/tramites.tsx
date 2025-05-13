@@ -1,48 +1,58 @@
 import { useState } from "react";
 import Search from "./Search";
 import Tree from "./Tree";
-
+import { validateDni, validatePartialDni, validateNumDoc } from "../utils/validation.js"; 
 export default function SeguimientoContainer() {
-  const [expediente, setExpediente] = useState(""); // Estado para el número de expediente (cara frontal)
-  const [dni, setDni] = useState(""); // Estado para el DNI (cara trasera)
-  const [tipoDoc, setTipoDoc] = useState(""); // Estado para tipo de documento
-  const [numDoc, setNumDoc] = useState(""); // Estado para número de documento
+  const [expediente, setExpediente] = useState("");
+  const [dni, setDni] = useState("");
+  const [tipoDoc, setTipoDoc] = useState("");
+  const [numDoc, setNumDoc] = useState("");
 
-  // Manejar búsqueda desde la cara frontal (solo expediente)
   const handleSearchFromFront = (query: string) => {
-    setExpediente(query); // Actualizamos solo el expediente
-    setDni(""); // Limpiamos DNI para que no se mezcle
-    setTipoDoc(""); // Limpiamos tipoDoc
-    setNumDoc(""); // Limpiamos numDoc
+    setExpediente(query);
+    setDni("");
+    setTipoDoc("");
+    setNumDoc("");
   };
 
-  // Manejar búsqueda desde la cara trasera (tres parámetros)
   const handleSearchFromBack = (dni: string, tipoDoc: string, numDoc: string) => {
-    setDni(dni); // Actualizamos DNI
-    setTipoDoc(tipoDoc); // Actualizamos tipo de documento
-    setNumDoc(numDoc); // Actualizamos número de documento
-    setExpediente(""); // Limpiamos expediente para que no se mezcle
+    if (!validateDni(dni)) {
+      alert("El DNI debe tener 8 dígitos numéricos");
+      return;
+    }
+
+    const formattedNumDoc = validateNumDoc(numDoc);
+    if (!formattedNumDoc) {
+      alert("El número de documento debe ser numérico y tener hasta 6 dígitos");
+      return;
+    }
+
+    setDni(dni);
+    setTipoDoc(tipoDoc);
+    setNumDoc(formattedNumDoc);
+    setExpediente("");
   };
 
-  // Manejar cambio en el input de la cara frontal (expediente)
   const handleFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExpediente(e.target.value);
   };
 
-  // Manejar cambio en el input de la cara trasera (DNI)
   const handleBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDni(e.target.value);
+    const value = e.target.value;
+    if (validatePartialDni(value)) {
+      setDni(value);
+    }
   };
 
   return (
     <div className="flex flex-col gap-8 px-4 pt-6 pb-12 max-w-6xl mx-auto">
       <Search
-        onSearch={handleSearchFromFront} // Búsqueda por expediente
-        onBackSearch={handleSearchFromBack} // Búsqueda por los tres parámetros
-        frontQuery={expediente} // Valor del expediente (cara frontal)
-        backQuery={dni} // Valor del DNI (cara trasera)
-        onFrontChange={handleFrontChange} // Cambio en la cara frontal
-        onBackChange={handleBackChange} // Cambio en la cara trasera
+        onSearch={handleSearchFromFront}
+        onBackSearch={handleSearchFromBack}
+        frontQuery={expediente}
+        backQuery={dni}
+        onFrontChange={handleFrontChange}
+        onBackChange={handleBackChange}
       />
       <Tree
         dni={dni}

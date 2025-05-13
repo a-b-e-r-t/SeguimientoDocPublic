@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ReactModal from "react-modal";
 import { fetchResumenPorExpediente } from "../../api/remitos";
 import { fetchResumenSinExpediente } from "../../api/Seguimiento_SinExp";
 
@@ -34,6 +35,8 @@ export default function Tree({ expediente, dni, tipoDoc, numDoc }: TreeProps) {
   const [datosSinExpediente, setDatosSinExpediente] = useState<DatoResumenSinExpediente[]>([]);
   const [cargando, setCargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [numeroExpedienteModal, setNumeroExpedienteModal] = useState<string | null>(null);
+  const [mostrarModal, setMostrarModal] = useState<boolean>(false);
 
   useEffect(() => {
     const obtenerDatos = async () => {
@@ -49,19 +52,23 @@ export default function Tree({ expediente, dni, tipoDoc, numDoc }: TreeProps) {
           const response = await fetchResumenSinExpediente(dni, tipoDoc, numDoc);
           setDatosSinExpediente(response.listaDocumentos);
           setDatosExpediente([]);
+          setNumeroExpedienteModal(response.numeroExpediente || null);
+          setMostrarModal(true);
         } else {
           setDatosExpediente([]);
           setDatosSinExpediente([]);
           setError('Por favor, proporcione un expediente o los parámetros de DNI, tipo de documento y número de documento.');
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         let errorMessage = 'Ocurrió un error al obtener los datos.';
-        if (error.message.includes('Documento no encontrado') || error.message.includes('No se encontraron datos')) {
-          errorMessage = 'Documento no encontrado.';
-        } else if (error.message.includes('Parámetros inválidos')) {
-          errorMessage = 'Los parámetros proporcionados son inválidos.';
-        } else if (error.message.includes('Error interno del servidor')) {
-          errorMessage = 'Error interno del servidor. Por favor, intenta de nuevo más tarde.';
+        if (error instanceof Error) {
+          if (error.message.includes('Documento no encontrado') || error.message.includes('No se encontraron datos')) {
+            errorMessage = 'Documento no encontrado.';
+          } else if (error.message.includes('Parámetros inválidos')) {
+            errorMessage = 'Los parámetros proporcionados son inválidos.';
+          } else if (error.message.includes('Error interno del servidor')) {
+            errorMessage = 'Error interno del servidor. Por favor, intenta de nuevo más tarde.';
+          }
         }
         setError(errorMessage);
         setDatosExpediente([]);
@@ -87,102 +94,96 @@ export default function Tree({ expediente, dni, tipoDoc, numDoc }: TreeProps) {
     });
   };
 
-  // Renderizado para búsqueda por expediente
-  if (expediente) {
-    return (
-      <div className="w-full">
-        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-md">
-          {cargando ? (
-            <p className="text-center text-black dark:text-white">Cargando datos...</p>
-          ) : error ? (
-            <p className="text-center text-red-500 dark:text-red-400">❌ {error}</p>
-          ) : datosExpediente.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-300">❌ No se encontraron registros para esta búsqueda por expediente.</p>
-          ) : (
-            <ul className="space-y-6 pl-6 text-left text-black dark:text-white max-h-96 overflow-y-auto pr-2 custom-scroll">
-              {datosExpediente.map((item, index) => (
-                <li key={index} className="flex items-start space-x-4">
-                  <div className="border-l-4 pl-4" style={{ borderColor: index === 0 ? "red" : "blue" }}>
-                    <div className="font-semibold">
-                      {index === 0 ? "Dependencia de Inicio:" : "Derivado a:"}
-                    </div>
-                    <div>{index === 0 ? item.co_dep_emi_ref || "MESA DE PARTES" : item.ti_emi_des || "CIUDADANO"}</div>
-                    <div className="text-sm font-normal">
-                      Responsable: {item.co_emp_des || "Sin responsable"}
-                    </div>
-                    {item.nu_expediente && (
-                      <div className="text-sm font-normal">
-                        Número de Expediente: {item.nu_expediente}
-                      </div>
-                    )}
-                    <div className="text-sm font-normal">
-                      Fecha de Solicitud: {formatearFechaHora(item.fecha)}
-                    </div>
-                    <div className="text-sm font-normal">
-                      Estado: {item.estado_doc || "Sin estado"}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Renderizado para búsqueda por dni, tipoDoc, numDoc
-  if (dni && tipoDoc && numDoc) {
-    return (
-      <div className="w-full">
-        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-md">
-          {cargando ? (
-            <p className="text-center text-black dark:text-white">Cargando datos...</p>
-          ) : error ? (
-            <p className="text-center text-red-500 dark:text-red-400">❌ {error}</p>
-          ) : datosSinExpediente.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-300">❌ Documento no encontrado.</p>
-          ) : (
-            <ul className="space-y-6 pl-6 text-left text-black dark:text-white max-h-96 overflow-y-auto pr-2 custom-scroll">
-              {datosSinExpediente.map((item, index) => (
-                <li key={index} className="flex items-start space-x-4">
-                  <div className="border-l-4 pl-4" style={{ borderColor: index === 0 ? "red" : "blue" }}>
-                    <div className="font-semibold">
-                      {index === 0 ? "Dependencia de Inicio:" : "Derivado a:"}
-                    </div>
-                    <div>{index === 0 ? item.co_dep_emi_ref || "MESA DE PARTES" : item.ti_emi_des || "CIUDADANO"}</div>
-                    <div className="text-sm font-normal">
-                      Responsable: {item.co_emp_des || "Sin responsable"}
-                    </div>
-                    {item.nu_expediente && (
-                      <div className="text-sm font-normal">
-                        Número de Expediente: {item.nu_expediente}
-                      </div>
-                    )}
-                    <div className="text-sm font-normal">
-                      Fecha de Solicitud: {formatearFechaHora(item.hora_recepcion)}
-                    </div>
-                    <div className="text-sm font-normal">
-                      Estado: {item.estado_documento || "Sin estado"}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Caso por defecto
   return (
     <div className="w-full">
-      <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-md">
-        {error ? (
-          <p className="text-center text-red-500 dark:text-red-400">❌ {error}</p>
+      {/* Modal de número de expediente */}
+      <ReactModal
+        isOpen={mostrarModal}
+        onRequestClose={() => setMostrarModal(false)}
+        className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-lg max-w-md mx-auto mt-24 text-center outline-none"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+        ariaHideApp={false}
+      >
+        {numeroExpedienteModal ? (
+          <h2 className="text-3xl font-bold text-black dark:text-white">
+            Número de Expediente: <br /> {numeroExpedienteModal}
+          </h2>
         ) : (
-          <p className="text-center text-gray-500 dark:text-gray-300">❌ Por favor, proporcione un expediente o los parámetros de búsqueda.</p>
+          <p className="text-base text-gray-700 dark:text-gray-300">
+            El documento aún sigue en proyecto.
+          </p>
+        )}
+        <button
+          onClick={() => setMostrarModal(false)}
+          className="mt-6 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
+        >
+          Cerrar
+        </button>
+      </ReactModal>
+
+      <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-md">
+        {cargando ? (
+          <p className="text-center text-black dark:text-white">Cargando datos...</p>
+        ) : error ? (
+          <p className="text-center text-red-500 dark:text-red-400">❌ {error}</p>
+        ) : datosExpediente.length === 0 && datosSinExpediente.length === 0 ? (
+          <p className="text-center text-gray-500 dark:text-gray-300">❌ Registro no encontrado.</p>
+        ) : expediente && datosExpediente.length > 0 ? (
+          <ul className="space-y-6 pl-6 text-left text-black dark:text-white max-h-96 overflow-y-auto pr-2 custom-scroll">
+            {datosExpediente.map((item, index) => (
+              <li key={index} className="flex items-start space-x-4">
+                <div className="border-l-4 pl-4" style={{ borderColor: index === 0 ? "red" : "blue" }}>
+                  <div className="font-semibold">
+                    {index === 0 ? "Dependencia de Inicio:" : "Derivado a:"}
+                  </div>
+                  <div>{index === 0 ? item.co_dep_emi_ref || "MESA DE PARTES" : item.ti_emi_des || "CIUDADANO"}</div>
+                  <div className="text-sm font-normal">
+                    Responsable: {item.co_emp_des || "Sin responsable"}
+                  </div>
+                  {item.nu_expediente && (
+                    <div className="text-sm font-normal">
+                      Número de Expediente: {item.nu_expediente}
+                    </div>
+                  )}
+                  <div className="text-sm font-normal">
+                    Fecha de Solicitud: {formatearFechaHora(item.fecha)}
+                  </div>
+                  <div className="text-sm font-normal">
+                    Estado: {item.estado_doc || "Sin estado"}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : datosSinExpediente.length > 0 ? (
+          <ul className="space-y-6 pl-6 text-left text-black dark:text-white max-h-96 overflow-y-auto pr-2 custom-scroll">
+            {datosSinExpediente.map((item, index) => (
+              <li key={index} className="flex items-start space-x-4">
+                <div className="border-l-4 pl-4" style={{ borderColor: index === 0 ? "red" : "blue" }}>
+                  <div className="font-semibold">
+                    {index === 0 ? "Dependencia de Inicio:" : "Derivado a:"}
+                  </div>
+                  <div>{index === 0 ? item.co_dep_emi_ref || "MESA DE PARTES" : item.ti_emi_des || "CIUDADANO"}</div>
+                  <div className="text-sm font-normal">
+                    Responsable: {item.co_emp_des || "Sin responsable"}
+                  </div>
+                  {item.nu_expediente && (
+                    <div className="text-sm font-normal">
+                      Número de Expediente: {item.nu_expediente}
+                    </div>
+                  )}
+                  <div className="text-sm font-normal">
+                    Fecha de Solicitud: {formatearFechaHora(item.hora_recepcion)}
+                  </div>
+                  <div className="text-sm font-normal">
+                    Estado: {item.estado_documento || "Sin estado"}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-center text-gray-500 dark:text-gray-300">❌ Registro no encontrado.</p>
         )}
       </div>
     </div>

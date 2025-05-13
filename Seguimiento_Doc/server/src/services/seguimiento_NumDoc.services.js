@@ -1,10 +1,9 @@
-import { query } from '../db/db.js';
+import { query } from "../db/db.js";
 
 export async function obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAdm) {
   const sql = `WITH DocumentoInicial AS (
     SELECT
         r.nu_emi,
-        'INICIO' AS co_dep_emi_ref,
         dep_des.de_dependencia AS ti_emi_des,
         u.cdes_user AS co_emp_des,
         r.fe_use_cre AS hora_recepcion,
@@ -32,8 +31,8 @@ export async function obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAd
 )
 
 SELECT 
-    COALESCE(rem.nu_emi, doc.nu_emi) AS nu_emi,
-    COALESCE(dep_emisora.de_dependencia, doc.co_dep_emi_ref) AS co_dep_emi_ref,
+	COALESCE(rem.nu_emi, doc.nu_emi) AS nu_emi,
+    COALESCE(dep_emisora.de_dependencia, 'INICIO') AS co_dep_emi_ref, 
     COALESCE(dep_destino.de_dependencia, doc.ti_emi_des) AS ti_emi_des,
     COALESCE(u1.cdes_user, doc.co_emp_des) AS co_emp_des,
     COALESCE(rem.fe_use_cre, doc.hora_recepcion) AS hora_recepcion,
@@ -76,7 +75,13 @@ LEFT JOIN
 
   try {
     const result = await query(sql, [nuDocEmi, coUseCre, coTipDocAdm]);
-    let expediente = (result[0]?.nu_expediente) || (result[1]?.nu_expediente);
+
+    // Si no hay resultados en la consulta, devolver un mensaje amigable
+    if (result.length === 0) {
+      return { message: "Archivo no encuentra ningún registro." };
+    }
+
+    let expediente = result[0]?.nu_expediente || result[1]?.nu_expediente;
 
     if (!expediente) {
       expediente = "documento aun en proyecto";
@@ -84,29 +89,41 @@ LEFT JOIN
 
     return {
       expediente,
-      documentos: result
+      documentos: result,
     };
   } catch (error) {
-    console.error('Error en el servicio de remitos:', error);
-    throw new Error('Error en la base de datos');
+    console.error("Error en el servicio de remitos:", error.message, error.stack);
+    throw new Error("Error en la base de datos");
   }
 }
 
 export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
   try {
+    // Validar los parámetros
+    if (!nuDocEmi || !coUseCre || !coTipDocAdm) {
+      throw new Error("Parámetros inválidos: nuDocEmi, coUseCre, coTipDocAdm");
+    }
+
     const resumen = await obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAdm);
+    
+    // Si la respuesta es un mensaje de no encontrar registros, devolver ese mensaje
+    if (resumen.message) {
+      return resumen;
+    }
+
     const documentos = resumen.documentos;
     const nuExpediente = resumen.expediente !== "documento aun en proyecto" ? resumen.expediente : null;
 
+    // Si no hay expediente, devolver solo documentos
     if (documentos.length === 1 && !nuExpediente) {
       return documentos;
     }
 
-    // Continuar con la segunda consulta si hay número de expediente
     if (!nuExpediente) {
-      throw new Error('No se pudo obtener el número de expediente');
+      throw new Error("No se pudo obtener el número de expediente");
     }
 
+    // Segunda consulta si existe un expediente
     const sql = `
       SELECT
           r.nu_emi AS nu_emi,
@@ -171,11 +188,19 @@ export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
           r.nu_expediente = $4;
     `;
 
-    const result = await query(sql, [nuDocEmi, coUseCre, coTipDocAdm, nuExpediente]);
-    return result;
+    const result = await query(sql, [
+      nuDocEmi,
+      coUseCre,
+      coTipDocAdm,
+      nuExpediente,
+    ]);
 
+    return {
+      expediente: nuExpediente,
+      documentos: result,
+    };
   } catch (error) {
-    console.error('Error en el método unionDoc:', error);
-    throw new Error('Error en la base de datos');
+    console.error("Error en el método unionDoc:", error.message, error.stack);
+    throw new Error("Error en la base de datos");
   }
 }

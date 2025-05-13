@@ -1,16 +1,15 @@
 import axios from 'axios';
+import BASE_URL from "./config";
 
 export const fetchResumenSinExpediente = async (dni, tipoDoc, numDoc) => {
   try {
-    // Validar parámetros
     if (!dni || !tipoDoc || !numDoc) {
       throw new Error('Faltan parámetros requeridos: DNI, tipo de documento o número de documento.');
     }
 
-    const response = await axios.get(`http://localhost:3001/api/seguimiento/${numDoc}/${dni}/${tipoDoc}`);
+    const response = await axios.get(`${BASE_URL}/seguimiento/${numDoc}/${dni}/${tipoDoc}`);
     const data = response.data;
 
-    // Si no hay documentos, lanzar error
     if (!data.documentos || data.documentos.length === 0) {
       throw new Error('Documento no encontrado.');
     }
