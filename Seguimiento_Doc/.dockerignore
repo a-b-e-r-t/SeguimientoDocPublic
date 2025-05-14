@@ -7,20 +7,20 @@ server/node_modules/
 .env
 .env.*
 
-# Archivos generados
+# Archivos generados durante la construcción
 dist/
 build/
 coverage/
 
-# Archivos de configuración de Docker y docker-compose 
+# Archivos de configuración de Docker y docker-compose (debe estar en la raíz del proyecto)
 Dockerfile
 docker-compose.yml
 
-# Archivos de Git
+# Archivos de configuración de Git
 .git/
 .gitignore
 
-# Archivos de logs
+# Archivos de logs (comunes)
 *.log
 
 # Archivos de configuración del editor (VSCode, IDEs)
@@ -28,16 +28,17 @@ docker-compose.yml
 .idea/
 *.swp
 
-# Ignorar archivos específicos de la plataforma
+# Archivos de caché específicos del sistema operativo
 .DS_Store
 Thumbs.db
 
 # Archivos sensibles como claves privadas
 *.pem
 
-# Archivos de caché de Next.js (si aplicas Next.js)
-.next/cache
-.next/server
+# Archivos específicos de Next.js (si aplica)
+.next/
+*.next/
 
 # Archivos de documentación
 README.md
+LICENSE

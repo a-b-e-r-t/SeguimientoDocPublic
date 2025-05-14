@@ -1,40 +1,31 @@
-# Etapa base
-FROM node:20-alpine AS base
+# Etapa 1: Construcción del frontend
+FROM node:16 AS build
 
 WORKDIR /app
 
-# --- Backend ---
-WORKDIR /app/server
-COPY server/package*.json ./
-RUN npm install --legacy-peer-deps
-COPY server ./
+# Copiar los archivos de cliente
+COPY ./client/package.json ./client/package-lock.json ./client/
+RUN npm install --prefix client
+COPY ./client ./client
 
-# --- Frontend ---
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm install --legacy-peer-deps
-COPY client ./
-RUN npm run build
+# Construir el frontend
+RUN npm run build --prefix client
 
-# --- Imagen final para producción ---
-FROM node:20-alpine AS final
+# Etapa 2: Construcción del backend
+FROM node:16
 
 WORKDIR /app
 
-# Instalar PM2 globalmente
-RUN npm install -g pm2
+# Copiar los archivos de backend
+COPY ./server/package.json ./server/package-lock.json ./server/
+RUN npm install --prefix server
+COPY ./server ./server
 
-# Copiar backend
-COPY --from=base /app/server /app/server
+# Copiar los archivos del frontend ya construidos
+COPY --from=build /app/client/dist /app/client/dist
 
-# Copiar frontend (dist compilado)
-COPY --from=base /app/client/dist /app/public
-
-# Copiar configuración de PM2
-COPY ecosystem.config.js .
-
-# Solo expones el puerto del frontend (interno: 3000)
+# Exponer el puerto para el backend
 EXPOSE 3000
 
-# Comando para iniciar ambos procesos
-CMD ["pm2-runtime", "ecosystem.config.js"]
+# Iniciar el servidor backend
+CMD ["npm", "--prefix", "server", "run", "start"]
