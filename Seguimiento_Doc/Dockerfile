@@ -1,4 +1,5 @@
-FROM node:20.x-alpine AS base
+# Etapa base
+FROM node:20-alpine AS base
 
 WORKDIR /app
 
@@ -9,24 +10,31 @@ RUN npm install --legacy-peer-deps
 COPY server ./
 
 # --- Frontend ---
-WORKDIR /app
 WORKDIR /app/client
 COPY client/package*.json ./
 RUN npm install --legacy-peer-deps
 COPY client ./
 RUN npm run build
 
-# --- Servir la aplicación ---
-FROM alpine/git AS final
+# --- Imagen final para producción ---
+FROM node:20-alpine AS final
 
+WORKDIR /app
+
+# Instalar PM2 globalmente
+RUN npm install -g pm2
+
+# Copiar backend
 COPY --from=base /app/server /app/server
+
+# Copiar frontend (dist compilado)
 COPY --from=base /app/client/dist /app/public
 
-RUN apk add --no-cache nodejs npm
-RUN npm install -g serve
+# Copiar configuración de PM2
+COPY ecosystem.config.js .
 
-# Exponer solo el puerto del frontend
+# Solo expones el puerto del frontend (interno: 3000)
 EXPOSE 3000
 
 # Comando para iniciar ambos procesos
-CMD sh -c "cd /app/server && npm start --port=8080 & cd /app/public && serve -s . -l 3000"
+CMD ["pm2-runtime", "ecosystem.config.js"]

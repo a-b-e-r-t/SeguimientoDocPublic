@@ -1,0 +1,43 @@
+# Ignorar node_modules para evitar copiar dependencias al contenedor
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Archivos y carpetas de entorno
+.env
+.env.*
+
+# Archivos generados
+dist/
+build/
+coverage/
+
+# Archivos de configuración de Docker y docker-compose 
+Dockerfile
+docker-compose.yml
+
+# Archivos de Git
+.git/
+.gitignore
+
+# Archivos de logs
+*.log
+
+# Archivos de configuración del editor (VSCode, IDEs)
+.vscode/
+.idea/
+*.swp
+
+# Ignorar archivos específicos de la plataforma
+.DS_Store
+Thumbs.db
+
+# Archivos sensibles como claves privadas
+*.pem
+
+# Archivos de caché de Next.js (si aplicas Next.js)
+.next/cache
+.next/server
+
+# Archivos de documentación
+README.md
