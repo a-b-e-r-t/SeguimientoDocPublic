@@ -8,7 +8,7 @@ services:
 """
 
 for i, env_file in enumerate(env_files):
-    service_name = env_file.replace(".env.", "seguimientoPublic_")
+    service_name = env_file.replace(".env.", "seguimiento_public_")
     port = 5000 + i
 
     compose_template += f"""

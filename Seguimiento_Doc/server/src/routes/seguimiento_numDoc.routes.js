@@ -1,4 +1,3 @@
-// En tu archivo de rutas: seguimiento_numDoc.routes.js
 import express from "express";
 import { listarSeguimiento } from "../controllers/seguimiento_NumDoc/seguimiento_numDoc.controller.js";
 import { validarSeguimientoParams } from "../middleware/seguimientoNumDoc/seguimiento_NumDoc.middleware.js"; 
