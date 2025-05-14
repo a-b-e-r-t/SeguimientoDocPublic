@@ -166,7 +166,7 @@ export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
                   idosgd.tdtr_estados e
               WHERE 
                   e.co_est = rem.es_doc_emi
-                  AND e.de_tab = 'TDTV_REMITOS'
+                  AND e.de_tab = 'TDTV_DESTINOS'
           ) AS estado_documento,
           rem.nu_doc_emi,
           doc_tipo.cdoc_desdoc AS tipo_documento
