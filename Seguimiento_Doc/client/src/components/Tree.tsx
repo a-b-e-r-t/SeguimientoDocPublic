@@ -146,11 +146,11 @@ export default function Tree({ expediente, dni, tipoDoc, numDoc }: TreeProps) {
                     </div>
                   )}
                   <div className="text-sm font-normal">
-                    Fecha de Solicitud: {formatearFechaHora(item.fecha)}
-                  </div>
-                  <div className="text-sm font-normal">
                     Estado: {item.estado_doc || "Sin estado"}
                   </div>
+                  <div className="text-sm font-normal">
+                    Fecha: {formatearFechaHora(item.fecha)}
+                  </div> 
                 </div>
               </li>
             ))}
@@ -173,10 +173,10 @@ export default function Tree({ expediente, dni, tipoDoc, numDoc }: TreeProps) {
                     </div>
                   )}
                   <div className="text-sm font-normal">
-                    Fecha de Solicitud: {formatearFechaHora(item.hora_recepcion)}
+                    Estado: {item.estado_documento || "Sin estado"}
                   </div>
                   <div className="text-sm font-normal">
-                    Estado: {item.estado_documento || "Sin estado"}
+                    Fecha: {formatearFechaHora(item.hora_recepcion)}
                   </div>
                 </div>
               </li>

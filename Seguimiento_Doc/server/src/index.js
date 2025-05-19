@@ -49,7 +49,7 @@ app.get(/(.*)/, (req, res) => {
 });
 
 // Servidor
-const PORT = 3000;
+const PORT = 3001;
 app.listen(PORT, '0.0.0.0',() => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });

@@ -4,26 +4,21 @@ export const listarSeguimiento = async (req, res) => {
   const { numeroDocumento, usuario, tipoDocumento } = req.params;
 
   try {
-    // Validar parámetros
     if (!numeroDocumento || !usuario || !tipoDocumento) {
       return res.status(400).json({ error: 'Faltan parámetros requeridos: número de documento, usuario o tipo de documento.' });
     }
 
     const seguimiento = await unionDoc(numeroDocumento, usuario, tipoDocumento);
 
-    // Si seguimiento es un array (caso de un solo resultado sin expediente), devolver con expediente null
     if (Array.isArray(seguimiento)) {
       return res.status(200).json({
         expediente: null,
         documentos: seguimiento
       });
     }
-
-    // Si seguimiento es un objeto { expediente, documentos }, devolver directamente
     return res.status(200).json(seguimiento);
   } catch (error) {
     console.error('Error en listarSeguimiento:', error.message, error.stack);
-    // Manejar específicamente el error de "No se pudo obtener el número de expediente"
     if (error.message.includes('No se pudo obtener el número de expediente')) {
       return res.status(404).json({ error: 'No se encontró el expediente para los parámetros proporcionados.' });
     }

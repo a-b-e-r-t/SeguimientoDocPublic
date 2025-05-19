@@ -1,5 +1,5 @@
 const { exec } = require("child_process");
-const env = process.env.NODE_ENV || 'production';
+const env = process.env.NODE_ENV || 'development';
 
 if (env === 'development') {
   console.log("🚀 Iniciando en modo desarrollo...\n");

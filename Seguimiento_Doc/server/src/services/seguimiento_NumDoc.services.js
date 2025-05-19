@@ -6,7 +6,7 @@ export async function obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAd
         r.nu_emi,
         dep_des.de_dependencia AS ti_emi_des,
         u.cdes_user AS co_emp_des,
-        r.fe_use_cre AS hora_recepcion,
+        r.fe_use_mod AS hora_recepcion,
         est.de_est AS estado_documento,
         r.nu_doc_emi,
         doc_tipo.cdoc_desdoc AS tipo_documento,
@@ -26,13 +26,13 @@ export async function obtenerResumenPorExpediente(nuDocEmi, coUseCre, coTipDocAd
         "IDOSGD_GRA".idosgd.si_mae_tipo_doc doc_tipo ON r.co_tip_doc_adm = doc_tipo.cdoc_tipdoc
     WHERE
         r.nu_doc_emi = $1
-        AND r.co_use_cre = $2
+        AND r.co_use_mod = $2
         AND r.co_tip_doc_adm = $3
 )
 
 SELECT 
 	COALESCE(rem.nu_emi, doc.nu_emi) AS nu_emi,
-    COALESCE(dep_emisora.de_dependencia, 'INICIO') AS co_dep_emi_ref, 
+    COALESCE(rem.co_dep_emi, 'INICIO') AS co_dep_emi_ref, 
     COALESCE(dep_destino.de_dependencia, doc.ti_emi_des) AS ti_emi_des,
     COALESCE(u1.cdes_user, doc.co_emp_des) AS co_emp_des,
     COALESCE(rem.fe_use_cre, doc.hora_recepcion) AS hora_recepcion,
@@ -130,7 +130,7 @@ export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
           'INICIO' AS co_dep_emi_ref,
           dep_des.de_dependencia AS ti_emi_des,
           u.cdes_user AS co_emp_des,
-          r.fe_use_cre AS hora_recepcion,
+          r.fe_use_mod AS hora_recepcion,
           est.de_est AS estado_documento,
           r.nu_doc_emi,
           doc_tipo.cdoc_desdoc AS tipo_documento
@@ -148,7 +148,7 @@ export async function unionDoc(nuDocEmi, coUseCre, coTipDocAdm) {
           "IDOSGD_GRA".idosgd.si_mae_tipo_doc doc_tipo ON r.co_tip_doc_adm = doc_tipo.cdoc_tipdoc
       WHERE
           r.nu_doc_emi = $1
-          AND r.co_use_cre = $2
+          AND r.co_use_mod = $2
           AND r.co_tip_doc_adm = $3
 
       UNION ALL
